@@ -9,7 +9,7 @@ import re
 
 
 # --------------------------- GROQ API SETTINGS --------------------------- #
-GROQ_API_KEY = GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 headers = {
     "Authorization": f"Bearer {GROQ_API_KEY}",
     "Content-Type": "application/json"

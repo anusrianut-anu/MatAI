@@ -8,7 +8,7 @@ import {
   Check, ArrowRight, Activity, Flame, Zap, AlertCircle, Shield, Trash2, 
   Play, Pause, Download, Sparkles, TrendingUp, Sliders, Search, User, 
   Bell, Lock, Database, Copy, RotateCcw, Maximize2, Volume2, Globe, EyeOff,
-  Info, FileText, Dumbbell, Languages
+  Info, FileText, Dumbbell, Languages, Menu, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -170,88 +170,95 @@ const MathGraphPlotter = ({ query }) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const width = (canvas.width = canvas.parentElement.clientWidth || 300);
-    const height = (canvas.height = 200);
 
-    ctx.clearRect(0, 0, width, height);
+    const drawGraph = () => {
+      const ctx = canvas.getContext('2d');
+      const width = (canvas.width = canvas.parentElement.clientWidth || 300);
+      const height = (canvas.height = 200);
 
-    ctx.strokeStyle = '#E5E7EB';
-    if (document.documentElement.classList.contains('dark')) {
-      ctx.strokeStyle = '#222226';
-    }
-    ctx.lineWidth = 0.5;
+      ctx.clearRect(0, 0, width, height);
 
-    const gridSize = 20;
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    for (let x = centerX; x < width; x += gridSize) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-    }
-    for (let x = centerX; x > 0; x -= gridSize) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-    }
-    for (let y = centerY; y < height; y += gridSize) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-    }
-    for (let y = centerY; y > 0; y -= gridSize) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-    }
-
-    ctx.strokeStyle = '#6B7280';
-    if (document.documentElement.classList.contains('dark')) {
-      ctx.strokeStyle = '#8B8D98';
-    }
-    ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height); ctx.stroke();
-
-    const parseFunc = (q) => {
-      const lower = q.toLowerCase();
-      if (lower.includes('sin')) return (x) => Math.sin(x) * 2;
-      if (lower.includes('cos')) return (x) => Math.cos(x) * 2;
-      if (lower.includes('tan')) return (x) => Math.tan(x) * 0.5;
-      if (lower.includes('x^2') || lower.includes('x²')) {
-        return (x) => (x * x - 5 * x + 6) * 0.2;
+      ctx.strokeStyle = '#E5E7EB';
+      if (document.documentElement.classList.contains('dark')) {
+        ctx.strokeStyle = '#222226';
       }
-      if (lower.includes('x^3') || lower.includes('x³')) {
-        return (x) => (x * x * x + 2 * x * x) * 0.05;
+      ctx.lineWidth = 0.5;
+
+      const gridSize = 20;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      for (let x = centerX; x < width; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
       }
-      return (x) => x * x * 0.2;
-    };
+      for (let x = centerX; x > 0; x -= gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+      }
+      for (let y = centerY; y < height; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+      }
+      for (let y = centerY; y > 0; y -= gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+      }
 
-    const func = parseFunc(query || '');
+      ctx.strokeStyle = '#6B7280';
+      if (document.documentElement.classList.contains('dark')) {
+        ctx.strokeStyle = '#8B8D98';
+      }
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height); ctx.stroke();
 
-    // Use accent color for curve
-    const accentStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-    ctx.strokeStyle = accentStyle || '#111111';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
+      const parseFunc = (q) => {
+        const lower = q.toLowerCase();
+        if (lower.includes('sin')) return (x) => Math.sin(x) * 2;
+        if (lower.includes('cos')) return (x) => Math.cos(x) * 2;
+        if (lower.includes('tan')) return (x) => Math.tan(x) * 0.5;
+        if (lower.includes('x^2') || lower.includes('x²')) {
+          return (x) => (x * x - 5 * x + 6) * 0.2;
+        }
+        if (lower.includes('x^3') || lower.includes('x³')) {
+          return (x) => (x * x * x + 2 * x * x) * 0.05;
+        }
+        return (x) => x * x * 0.2;
+      };
 
-    let first = true;
-    const scaleX = 20;
-    const scaleY = 20;
+      const func = parseFunc(query || '');
 
-    for (let pxX = 0; pxX < width; pxX++) {
-      const mathX = (pxX - centerX) / scaleX;
-      const mathY = func(mathX);
-      const pxY = centerY - (mathY * scaleY);
+      // Use accent color for curve
+      const accentStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      ctx.strokeStyle = accentStyle || '#111111';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
 
-      if (pxY >= 0 && pxY <= height) {
-        if (first) {
-          ctx.moveTo(pxX, pxY);
-          first = false;
-        } else {
-          ctx.lineTo(pxX, pxY);
+      let first = true;
+      const scaleX = 20;
+      const scaleY = 20;
+
+      for (let pxX = 0; pxX < width; pxX++) {
+        const mathX = (pxX - centerX) / scaleX;
+        const mathY = func(mathX);
+        const pxY = centerY - (mathY * scaleY);
+
+        if (pxY >= 0 && pxY <= height) {
+          if (first) {
+            ctx.moveTo(pxX, pxY);
+            first = false;
+          } else {
+            ctx.lineTo(pxX, pxY);
+          }
         }
       }
-    }
-    ctx.stroke();
+      ctx.stroke();
 
-    ctx.fillStyle = '#6B7280';
-    ctx.font = '9px monospace';
-    ctx.fillText('y = f(x) Plot', 10, 15);
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '9px monospace';
+      ctx.fillText('y = f(x) Plot', 10, 15);
+    };
+
+    drawGraph();
+    window.addEventListener('resize', drawGraph);
+    return () => window.removeEventListener('resize', drawGraph);
   }, [query]);
 
   return (
@@ -267,8 +274,34 @@ const ChatWorkspace = () => {
   const { logout, user } = useAuth();
   const { xp, level, streak, rank, addXp, updateMissionProgress, unlockAchievement } = useGame();
 
+  // Screen size detection state
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(window.innerWidth < 1024);
+  const [mobileVisualsExpanded, setMobileVisualsExpanded] = useState(true);
+
   // Sidebar collapsing toggle state
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setViewportWidth(width);
+      if (width < 1024) {
+        setSidebarCollapsed(true);
+      } else {
+        setSidebarCollapsed(false);
+        setRightPanelCollapsed(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = viewportWidth < 768;
+  const isTablet = viewportWidth >= 768 && viewportWidth < 1024;
+  const isDesktop = viewportWidth >= 1024;
 
   // Active navigation view state
   const [activeView, setActiveView] = useState('chat');
@@ -303,6 +336,17 @@ const ChatWorkspace = () => {
 
   // Video state
   const videoRef = useRef(null);
+  const videoSectionRef = useRef(null);
+  const vizSectionRef = useRef(null);
+
+  useEffect(() => {
+    if (activeOutputTab === 'video' && videoSectionRef.current) {
+      videoSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else if (activeOutputTab === 'visualization' && vizSectionRef.current) {
+      vizSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [activeOutputTab]);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -547,7 +591,6 @@ const ChatWorkspace = () => {
     { label: 'history', icon: History },
     { label: 'bookmarks', icon: Bookmark },
     { label: 'achievements', icon: Award },
-    { label: 'analytics', icon: BarChart2 },
   ];
 
   const quickAccessItems = [
@@ -586,26 +629,46 @@ const ChatWorkspace = () => {
     <div className={`min-h-screen bg-background-primary flex text-text-primary ${getFontSizeClass()} font-sans overflow-hidden`}>
       
       {/* COLUMN 1: LEFT SIDEBAR */}
-      <aside className={`border-r border-border-custom bg-background-secondary flex flex-col h-screen flex-shrink-0 select-none transition-all duration-300 ${
-        sidebarCollapsed ? 'w-16' : 'w-64'
-      }`}>
+      {isMobile && mobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 animate-fade-in"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={`select-none transition-all duration-300 flex flex-col h-screen
+        ${isMobile 
+          ? `fixed inset-y-0 left-0 z-50 w-64 bg-background-secondary border-r border-border-custom transform ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}` 
+          : `border-r border-border-custom bg-background-secondary flex-shrink-0 ${sidebarCollapsed ? 'w-16' : 'w-64'}`
+        }`}
+      >
         {/* Brand */}
         <div className="p-4 border-b border-border-custom flex items-center justify-between">
           <div className="flex items-center space-x-2 overflow-hidden">
             <div className="w-8 h-8 rounded flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}>
               M
             </div>
-            {!sidebarCollapsed && (
+            {(!sidebarCollapsed || isMobile) && (
               <span className="font-display font-bold text-base tracking-tight text-text-primary whitespace-nowrap">MatAI Workspace</span>
             )}
           </div>
-          <button 
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-1 rounded hover:bg-background-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
-            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <ChevronRight size={14} className={`transform transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`} />
-          </button>
+          {isMobile ? (
+            <button 
+              onClick={() => setMobileSidebarOpen(false)}
+              className="p-1 rounded hover:bg-background-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+              title="Close sidebar"
+            >
+              <X size={16} />
+            </button>
+          ) : (
+            <button 
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-1 rounded hover:bg-background-primary text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <ChevronRight size={14} className={`transform transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`} />
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
@@ -624,180 +687,237 @@ const ChatWorkspace = () => {
                     } else {
                       setActiveView(item.label);
                     }
+                    if (isMobile) setMobileSidebarOpen(false);
                   }}
                   className={`w-full flex items-center px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                     isActive 
-                      ? 'bg-background-primary border border-border-custom text-text-primary font-bold shadow-xs' 
+                      ? 'border border-border-custom font-bold shadow-xs' 
                       : 'text-text-secondary hover:text-text-primary hover:bg-background-primary/50'
-                  } ${sidebarCollapsed ? 'justify-center' : 'space-x-3'}`}
+                  } ${(sidebarCollapsed && !isMobile) ? 'justify-center' : 'space-x-3'}`}
                   title={t(item.label)}
-                  style={isActive ? { color: 'var(--accent)' } : {}}
+                  style={isActive ? {
+                    backgroundColor: 'var(--accent-light)',
+                    color: 'var(--accent)',
+                    borderLeft: '3px solid var(--accent)'
+                  } : {}}
                 >
                   <Icon size={14} style={isActive ? { color: 'var(--accent)' } : {}} />
-                  {!sidebarCollapsed && <span>{t(item.label)}</span>}
+                  {(!sidebarCollapsed || isMobile) && <span>{t(item.label)}</span>}
                 </button>
               );
             })}
           </div>
 
           {/* Quick Access */}
-          {!sidebarCollapsed && (
-            <div className="space-y-2 pt-2 border-t border-border-custom">
+          <div className="space-y-2 pt-2 border-t border-border-custom">
+            {(!sidebarCollapsed || isMobile) && (
               <span className="px-3 text-[10px] font-mono text-text-secondary uppercase tracking-wider block">{t('quickAccess')}</span>
-              <div className="space-y-0.5">
-                {quickAccessItems.map((item, idx) => {
-                  const Icon = item.icon;
-                  const isActive = activeView === item.label;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveView(item.label)}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-                        isActive 
-                          ? 'bg-background-primary border border-border-custom text-text-primary shadow-xs' 
-                          : 'text-text-secondary hover:text-text-primary hover:bg-background-primary/50'
-                      }`}
-                      style={isActive ? { color: 'var(--accent)' } : {}}
-                    >
-                      <Icon size={14} style={isActive ? { color: 'var(--accent)' } : {}} />
-                      <span>{t(item.label === 'formula sheet' ? 'formulaSheet' : item.label)}</span>
-                    </button>
-                  );
-                })}
-              </div>
+            )}
+            <div className="space-y-0.5">
+              {quickAccessItems.map((item, idx) => {
+                const Icon = item.icon;
+                const isActive = activeView === item.label;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setActiveView(item.label);
+                      if (isMobile) setMobileSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+                      isActive 
+                        ? 'border border-border-custom font-bold shadow-xs' 
+                        : 'text-text-secondary hover:text-text-primary hover:bg-background-primary/50'
+                    } ${(sidebarCollapsed && !isMobile) ? 'justify-center' : 'space-x-3'}`}
+                    style={isActive ? {
+                      backgroundColor: 'var(--accent-light)',
+                      color: 'var(--accent)',
+                      borderLeft: '3px solid var(--accent)'
+                    } : {}}
+                    title={t(item.label === 'formula sheet' ? 'formulaSheet' : item.label)}
+                  >
+                    <Icon size={14} style={isActive ? { color: 'var(--accent)' } : {}} />
+                    {(!sidebarCollapsed || isMobile) && <span>{t(item.label === 'formula sheet' ? 'formulaSheet' : item.label)}</span>}
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
+
+          {/* Analytics (above Settings, below Quick Access) */}
+          <div className="space-y-1 pt-2 border-t border-border-custom">
+            {(!sidebarCollapsed || isMobile) && (
+              <span className="px-3 text-[10px] font-mono text-text-secondary uppercase tracking-wider block">Analytics</span>
+            )}
+            <button
+              onClick={() => {
+                setActiveView('analytics');
+                if (isMobile) setMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+                activeView === 'analytics'
+                  ? 'border border-border-custom font-bold shadow-xs'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-background-primary/50'
+              } ${(sidebarCollapsed && !isMobile) ? 'justify-center' : 'space-x-3'}`}
+              title={t('analytics')}
+              style={activeView === 'analytics' ? {
+                backgroundColor: 'var(--accent-light)',
+                color: 'var(--accent)',
+                borderLeft: '3px solid var(--accent)'
+              } : {}}
+            >
+              <BarChart2 size={14} style={activeView === 'analytics' ? { color: 'var(--accent)' } : {}} />
+              {(!sidebarCollapsed || isMobile) && <span>{t('analytics')}</span>}
+            </button>
+          </div>
 
           {/* Settings Accordion */}
-          {!sidebarCollapsed && (
-            <div className="space-y-1 pt-2 border-t border-border-custom">
-              <button
-                onClick={() => setSettingsOpen(!settingsOpen)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-background-primary/50 transition-all cursor-pointer"
-              >
-                <div className="flex items-center space-x-3">
-                  <Settings size={14} />
-                  <span>{t('settings')}</span>
-                </div>
+          <div className="space-y-1 pt-2 border-t border-border-custom">
+            <button
+              onClick={() => {
+                if (sidebarCollapsed && !isMobile) {
+                  setSidebarCollapsed(false);
+                  setSettingsOpen(true);
+                } else {
+                  setSettingsOpen(!settingsOpen);
+                }
+              }}
+              className={`w-full flex items-center rounded-lg text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-background-primary/50 transition-all cursor-pointer ${
+                (sidebarCollapsed && !isMobile) ? 'justify-center py-2' : 'justify-between px-3 py-2'
+              }`}
+              title={t('settings')}
+            >
+              <div className="flex items-center space-x-3">
+                <Settings size={14} />
+                {(!sidebarCollapsed || isMobile) && <span>{t('settings')}</span>}
+              </div>
+              {(!sidebarCollapsed || isMobile) && (
                 <ChevronDown size={12} className={`transform transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
-              </button>
+              )}
+            </button>
 
-              {settingsOpen && (
-                <div className="ml-2 space-y-1 animate-fade-in">
-                  {/* Appearance */}
-                  <div className="border border-border-custom rounded-lg overflow-hidden">
-                    <button onClick={() => toggleSettingsSection('appearance')} className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
-                      <span>{t('appearance')}</span>
-                      <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'appearance' ? 'rotate-90' : ''}`} />
-                    </button>
-                    {settingsSection === 'appearance' && (
-                      <div className="p-2 space-y-2 bg-background-primary">
-                        <div className="grid grid-cols-3 gap-1">
-                          {['light', 'dark', 'system'].map((mode) => (
-                            <button key={mode} onClick={() => setAppearance(mode)}
-                              className={`py-1 rounded text-[9px] font-bold uppercase cursor-pointer transition-all ${appearance === mode ? 'text-white' : 'text-text-secondary hover:text-text-primary bg-background-secondary'}`}
-                              style={appearance === mode ? { backgroundColor: 'var(--accent)', color: 'var(--accent-text)' } : {}}
-                            >{t(mode)}</button>
-                          ))}
-                        </div>
+            {settingsOpen && (!sidebarCollapsed || isMobile) && (
+              <div className="ml-2 space-y-1 animate-fade-in text-[10px]">
+                {/* 1. Theme */}
+                <div className="border border-border-custom rounded-lg overflow-hidden">
+                  <button onClick={() => toggleSettingsSection('theme')} className="w-full flex items-center justify-between px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
+                    <span>Theme</span>
+                    <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'theme' ? 'rotate-90' : ''}`} />
+                  </button>
+                  {settingsSection === 'theme' && (
+                    <div className="p-2 space-y-2 bg-background-primary">
+                      <div className="grid grid-cols-3 gap-1">
+                        {['light', 'dark', 'system'].map((mode) => (
+                          <button key={mode} onClick={() => setAppearance(mode)}
+                            className={`py-1 rounded text-[8px] font-bold uppercase cursor-pointer transition-all ${appearance === mode ? 'text-white' : 'text-text-secondary hover:text-text-primary bg-background-secondary'}`}
+                            style={appearance === mode ? { backgroundColor: 'var(--accent)', color: 'var(--accent-text)' } : {}}
+                          >{t(mode)}</button>
+                        ))}
                       </div>
-                    )}
-                  </div>
-
-                  {/* Theme Colors */}
-                  <div className="border border-border-custom rounded-lg overflow-hidden">
-                    <button onClick={() => toggleSettingsSection('theme')} className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
-                      <span>{t('themeColors')}</span>
-                      <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'theme' ? 'rotate-90' : ''}`} />
-                    </button>
-                    {settingsSection === 'theme' && (
-                      <div className="p-2 bg-background-primary">
-                        <div className="flex gap-2 justify-center">
-                          {[
-                            { id: 'white', color: '#888', label: 'W' },
-                            { id: 'black', color: '#000', label: 'B' },
-                            { id: 'blue', color: '#2563EB', label: '' },
-                            { id: 'green', color: '#16A34A', label: '' },
-                            { id: 'orange', color: '#EA580C', label: '' },
-                          ].map((ac) => (
-                            <button key={ac.id} onClick={() => setAccentColor(ac.id)}
-                              className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer ${accentColor === ac.id ? 'ring-2 ring-border-custom border-text-primary scale-110' : 'border-transparent'}`}
-                              style={{ backgroundColor: ac.color }}
-                              title={ac.id}
-                            />
-                          ))}
-                        </div>
+                      <div className="flex gap-2 justify-center pt-1.5 border-t border-border-custom/50">
+                        {[
+                          { id: 'white', color: '#888' },
+                          { id: 'black', color: '#000' },
+                          { id: 'blue', color: '#2563EB' },
+                          { id: 'green', color: '#16A34A' },
+                          { id: 'orange', color: '#EA580C' },
+                        ].map((ac) => (
+                          <button key={ac.id} onClick={() => setAccentColor(ac.id)}
+                            className={`w-5 h-5 rounded-full border transition-all cursor-pointer ${accentColor === ac.id ? 'ring-2 ring-offset-1 ring-text-primary scale-110' : 'border-border-custom'}`}
+                            style={{ backgroundColor: ac.color }}
+                            title={ac.id}
+                          />
+                        ))}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Language */}
-                  <div className="border border-border-custom rounded-lg overflow-hidden">
-                    <button onClick={() => toggleSettingsSection('language')} className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
-                      <span>{t('language')}</span>
-                      <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'language' ? 'rotate-90' : ''}`} />
-                    </button>
-                    {settingsSection === 'language' && (
-                      <div className="p-2 bg-background-primary">
-                        <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full text-xs p-1.5 rounded border border-border-custom bg-background-primary">
-                          {languageOptions.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-                        </select>
-                      </div>
-                    )}
-                  </div>
+                {/* 2. Language */}
+                <div className="border border-border-custom rounded-lg overflow-hidden">
+                  <button onClick={() => toggleSettingsSection('language')} className="w-full flex items-center justify-between px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
+                    <span>{t('language')}</span>
+                    <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'language' ? 'rotate-90' : ''}`} />
+                  </button>
+                  {settingsSection === 'language' && (
+                    <div className="p-2 bg-background-primary">
+                      <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full text-[9px] p-1 rounded border border-border-custom bg-background-primary focus:border-accent">
+                        {languageOptions.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Font Size */}
-                  <div className="border border-border-custom rounded-lg overflow-hidden">
-                    <button onClick={() => toggleSettingsSection('font')} className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
-                      <span>{t('fontSize')}</span>
-                      <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'font' ? 'rotate-90' : ''}`} />
-                    </button>
-                    {settingsSection === 'font' && (
-                      <div className="p-2 bg-background-primary">
-                        <div className="grid grid-cols-3 gap-1">
+                {/* 3. Cache Clear */}
+                <div className="border border-border-custom rounded-lg overflow-hidden">
+                  <button onClick={() => toggleSettingsSection('cache')} className="w-full flex items-center justify-between px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
+                    <span>Cache Clear</span>
+                    <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'cache' ? 'rotate-90' : ''}`} />
+                  </button>
+                  {settingsSection === 'cache' && (
+                    <div className="p-2 space-y-2 bg-background-primary">
+                      <div className="flex justify-between text-[9px] text-text-secondary"><span>Storage size:</span><span className="font-mono font-semibold text-text-primary">{storageCacheSize}</span></div>
+                      <button onClick={handleClearCache} className="w-full py-1 rounded text-[9px] font-bold cursor-pointer transition-all" style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}>{t('clearCache')}</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Accessibility */}
+                <div className="border border-border-custom rounded-lg overflow-hidden">
+                  <button onClick={() => toggleSettingsSection('accessibility')} className="w-full flex items-center justify-between px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
+                    <span>Accessibility</span>
+                    <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'accessibility' ? 'rotate-90' : ''}`} />
+                  </button>
+                  {settingsSection === 'accessibility' && (
+                    <div className="p-2 space-y-2 bg-background-primary">
+                      <div>
+                        <label className="text-[8px] font-semibold text-text-secondary">{t('fontSize')}</label>
+                        <div className="grid grid-cols-3 gap-1 mt-1">
                           {['small', 'medium', 'large'].map((size) => (
                             <button key={size} onClick={() => { setFontSize(size); localStorage.setItem('matai_font_size', size); }}
-                              className={`py-1 rounded text-[9px] font-bold uppercase cursor-pointer transition-all ${fontSize === size ? '' : 'text-text-secondary bg-background-secondary'}`}
+                              className={`py-1 rounded text-[8px] font-bold uppercase cursor-pointer transition-all ${fontSize === size ? '' : 'text-text-secondary bg-background-secondary'}`}
                               style={fontSize === size ? { backgroundColor: 'var(--accent)', color: 'var(--accent-text)' } : {}}
                             >{t(size)}</button>
                           ))}
                         </div>
                       </div>
-                    )}
-                  </div>
+                      <label className="flex items-center space-x-2 text-[9px] text-text-secondary cursor-pointer pt-1 border-t border-border-custom/50">
+                        <input type="checkbox" checked={katexEnabled} onChange={(e) => setKatexEnabled(e.target.checked)} className="h-3 w-3" />
+                        <span>{t('katex')}</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Math Settings */}
-                  <div className="border border-border-custom rounded-lg overflow-hidden">
-                    <button onClick={() => toggleSettingsSection('math')} className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
-                      <span>{t('mathSettings')}</span>
-                      <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'math' ? 'rotate-90' : ''}`} />
-                    </button>
-                    {settingsSection === 'math' && (
-                      <div className="p-2 space-y-1.5 bg-background-primary">
-                        <label className="flex items-center space-x-2 text-[10px] text-text-secondary cursor-pointer"><input type="checkbox" checked={katexEnabled} onChange={(e) => setKatexEnabled(e.target.checked)} className="h-3 w-3" /><span>{t('katex')}</span></label>
-                        <label className="flex items-center space-x-2 text-[10px] text-text-secondary cursor-pointer"><input type="checkbox" checked={showSteps} onChange={(e) => setShowSteps(e.target.checked)} className="h-3 w-3" /><span>{t('showSteps')}</span></label>
-                        <label className="flex items-center space-x-2 text-[10px] text-text-secondary cursor-pointer"><input type="checkbox" checked={autoSimplify} onChange={(e) => setAutoSimplify(e.target.checked)} className="h-3 w-3" /><span>{t('autoSimplify')}</span></label>
+                {/* 5. Preferences */}
+                <div className="border border-border-custom rounded-lg overflow-hidden">
+                  <button onClick={() => toggleSettingsSection('preferences')} className="w-full flex items-center justify-between px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
+                    <span>Preferences</span>
+                    <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'preferences' ? 'rotate-90' : ''}`} />
+                  </button>
+                  {settingsSection === 'preferences' && (
+                    <div className="p-2 space-y-2 bg-background-primary">
+                      <div className="space-y-1">
+                        <span className="text-[8px] font-bold text-text-secondary uppercase">Math Options</span>
+                        <label className="flex items-center space-x-2 text-[8px] text-text-secondary cursor-pointer">
+                          <input type="checkbox" checked={showSteps} onChange={(e) => setShowSteps(e.target.checked)} className="h-3 w-3" />
+                          <span>{t('showSteps')}</span>
+                        </label>
+                        <label className="flex items-center space-x-2 text-[8px] text-text-secondary cursor-pointer">
+                          <input type="checkbox" checked={autoSimplify} onChange={(e) => setAutoSimplify(e.target.checked)} className="h-3 w-3" />
+                          <span>{t('autoSimplify')}</span>
+                        </label>
                         <div className="pt-1">
-                          <label className="text-[9px] font-semibold text-text-secondary">{t('angleUnit')}</label>
-                          <select value={angleUnit} onChange={(e) => setAngleUnit(e.target.value)} className="w-full text-[10px] p-1 rounded border border-border-custom bg-background-primary mt-0.5">
+                          <label className="text-[8px] font-semibold text-text-secondary">{t('angleUnit')}</label>
+                          <select value={angleUnit} onChange={(e) => setAngleUnit(e.target.value)} className="w-full text-[8px] p-1 rounded border border-border-custom bg-background-primary mt-0.5">
                             <option value="radians">Radians</option><option value="degrees">Degrees</option>
                           </select>
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* AI Settings */}
-                  <div className="border border-border-custom rounded-lg overflow-hidden">
-                    <button onClick={() => toggleSettingsSection('ai')} className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
-                      <span>{t('aiSettings')}</span>
-                      <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'ai' ? 'rotate-90' : ''}`} />
-                    </button>
-                    {settingsSection === 'ai' && (
-                      <div className="p-2 space-y-2 bg-background-primary">
+                      <div className="space-y-1.5 pt-1.5 border-t border-border-custom/50">
+                        <span className="text-[8px] font-bold text-text-secondary uppercase">AI Engine</span>
                         <div>
-                          <label className="text-[9px] font-semibold text-text-secondary">{t('aiModel')}</label>
-                          <select value={aiModel} onChange={(e) => setAiModel(e.target.value)} className="w-full text-[10px] p-1 rounded border border-border-custom bg-background-primary mt-0.5">
+                          <select value={aiModel} onChange={(e) => setAiModel(e.target.value)} className="w-full text-[8px] p-1 rounded border border-border-custom bg-background-primary">
                             <option value="llama3-70b">Llama 3 70B (Groq)</option>
                             <option value="mixtral-8x7b">Mixtral 8x7B</option>
                             <option value="gpt4o">GPT-4o</option>
@@ -805,54 +925,30 @@ const ChatWorkspace = () => {
                           </select>
                         </div>
                         <div>
-                          <div className="flex justify-between text-[9px] text-text-secondary"><span>{t('responseLen')}</span><span>{responseLength * 5} tokens</span></div>
+                          <div className="flex justify-between text-[8px] text-text-secondary"><span>Tokens limit</span><span>{responseLength * 5}</span></div>
                           <input type="range" min="1" max="100" value={responseLength} onChange={(e) => setResponseLength(parseInt(e.target.value))} className="w-full h-1 rounded-lg appearance-none cursor-pointer" />
                         </div>
                         <div>
-                          <div className="flex justify-between text-[9px] text-text-secondary"><span>{t('temperature')}</span><span>{(temperature/100).toFixed(2)}</span></div>
+                          <div className="flex justify-between text-[8px] text-text-secondary"><span>Temp</span><span>{(temperature/100).toFixed(2)}</span></div>
                           <input type="range" min="0" max="100" value={temperature} onChange={(e) => setTemperature(parseInt(e.target.value))} className="w-full h-1 rounded-lg appearance-none cursor-pointer" />
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Cache & Data */}
-                  <div className="border border-border-custom rounded-lg overflow-hidden">
-                    <button onClick={() => toggleSettingsSection('cache')} className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-text-primary bg-background-primary/50 cursor-pointer">
-                      <span>{t('cacheData')}</span>
-                      <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'cache' ? 'rotate-90' : ''}`} />
-                    </button>
-                    {settingsSection === 'cache' && (
-                      <div className="p-2 space-y-2 bg-background-primary">
-                        <div className="flex justify-between text-[10px] text-text-secondary"><span>Cached:</span><span className="font-mono font-semibold text-text-primary">{storageCacheSize}</span></div>
-                        <button onClick={handleClearCache} className="w-full py-1 rounded text-[10px] font-bold cursor-pointer transition-all" style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}>{t('clearCache')}</button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Danger Zone */}
-                  <div className="border border-red-300 dark:border-red-900 rounded-lg overflow-hidden">
-                    <button onClick={() => toggleSettingsSection('danger')} className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-red-500 bg-background-primary/50 cursor-pointer">
-                      <span>{t('dangerZone')}</span>
-                      <ChevronRight size={10} className={`transform transition-transform ${settingsSection === 'danger' ? 'rotate-90' : ''}`} />
-                    </button>
-                    {settingsSection === 'danger' && (
-                      <div className="p-2 bg-background-primary">
-                        <button onClick={handleClearHistory} className="w-full py-1.5 rounded bg-red-100 hover:bg-red-200 dark:bg-red-950/40 border border-red-300 dark:border-red-900 text-[10px] font-semibold text-red-600 dark:text-red-400 flex items-center justify-center space-x-1 cursor-pointer">
-                          <Trash2 size={11} /><span>{t('clearChats')}</span>
+                      <div className="pt-1.5 border-t border-border-custom/50">
+                        <button onClick={handleClearHistory} className="w-full py-1 rounded bg-red-100 hover:bg-red-200 dark:bg-red-950/40 border border-red-300 dark:border-red-900 text-[8px] font-semibold text-red-600 dark:text-red-400 flex items-center justify-center space-x-1 cursor-pointer">
+                          <Trash2 size={10} /><span>{t('clearChats')}</span>
                         </button>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Bottom stats */}
         <div className="p-3 border-t border-border-custom space-y-3 bg-background-primary/40">
-          {!sidebarCollapsed ? (
+          {(!sidebarCollapsed || isMobile) ? (
             <div className="border border-border-custom bg-background-primary p-3 rounded-xl space-y-1.5 font-mono text-[10px]">
               <div className="flex justify-between items-center text-text-secondary"><span>{t('rank')}:</span><span className="font-bold text-text-primary">{rank}</span></div>
               <div className="flex justify-between items-center text-text-secondary"><span>{t('level')}:</span><span className="font-bold text-text-primary">{level}</span></div>
@@ -869,17 +965,38 @@ const ChatWorkspace = () => {
       </aside>
 
       {/* COLUMN 2: MAIN VIEW WORKSPACE */}
-      <section className="flex-1 border-r border-border-custom flex flex-col h-screen overflow-hidden bg-background-primary">
-        <header className="p-4 border-b border-border-custom flex items-center justify-between bg-background-secondary">
+      <section className="flex-1 border-r border-border-custom flex flex-col h-screen overflow-hidden bg-background-primary w-full">
+        <header className="p-4 border-b border-border-custom flex items-center justify-between bg-background-secondary select-none">
           <div className="flex items-center space-x-3">
+            {isMobile && (
+              <button 
+                onClick={() => setMobileSidebarOpen(true)}
+                className="p-1.5 rounded-lg border border-border-custom bg-background-primary hover:bg-background-secondary text-text-secondary hover:text-text-primary cursor-pointer flex items-center justify-center"
+                title="Open sidebar"
+              >
+                <Menu size={14} />
+              </button>
+            )}
             <span className="font-mono text-xs font-bold text-text-primary border border-border-custom px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--accent-light)' }}>
               {activeView.toUpperCase()} VIEW
             </span>
-            <span className="text-[11px] text-text-secondary font-medium">{t('mathEngine')}</span>
+            <span className="text-[11px] text-text-secondary font-medium hidden sm:inline">{t('mathEngine')}</span>
           </div>
-          <div className="flex items-center space-x-2 text-[10px] font-mono text-text-secondary">
-            <span className={`w-1.5 h-1.5 rounded-full ${loading ? 'bg-orange-400 animate-pulse' : 'bg-green-500'}`}></span>
-            <span>{loading ? t('compiling') : t('online')}</span>
+          <div className="flex items-center space-x-3">
+            {!isMobile && (
+              <button
+                onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+                className="px-2 py-1 rounded-lg border border-border-custom bg-background-primary hover:bg-background-secondary text-text-secondary hover:text-text-primary cursor-pointer flex items-center space-x-1.5 transition-all text-[10px] font-mono font-bold"
+                title={rightPanelCollapsed ? "Show output panel" : "Hide output panel"}
+              >
+                <Layers size={12} style={!rightPanelCollapsed ? { color: 'var(--accent)' } : {}} />
+                <span>{rightPanelCollapsed ? "SHOW PANEL" : "HIDE PANEL"}</span>
+              </button>
+            )}
+            <div className="flex items-center space-x-2 text-[10px] font-mono text-text-secondary">
+              <span className={`w-1.5 h-1.5 rounded-full ${loading ? 'bg-orange-400 animate-pulse' : 'bg-green-500'}`}></span>
+              <span>{loading ? t('compiling') : t('online')}</span>
+            </div>
           </div>
         </header>
 
@@ -887,12 +1004,75 @@ const ChatWorkspace = () => {
           
           {/* A. CHAT VIEW */}
           {activeView === 'chat' && (
-            <div className="h-full flex flex-col justify-between">
-              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scrollbar-thin">
+            <div className="h-full flex flex-col justify-between overflow-hidden">
+              {/* If on mobile, stack Video and Visualization at the top of the chat page */}
+              {isMobile && (
+                <div className="flex-shrink-0 border-b border-border-custom bg-background-secondary p-3 space-y-3 max-h-[260px] overflow-y-auto scrollbar-thin">
+                  <div className="flex justify-between items-center text-[10px] font-mono text-text-secondary uppercase">
+                    <span className="font-bold flex items-center space-x-1">
+                      <Play size={10} className="text-text-secondary" />
+                      <span>{t('videoPlayer')} &amp; {t('visualization')}</span>
+                    </span>
+                    <button 
+                      onClick={() => setMobileVisualsExpanded(!mobileVisualsExpanded)}
+                      className="px-2 py-0.5 rounded border border-border-custom bg-background-primary hover:bg-background-secondary cursor-pointer font-bold text-[9px]"
+                    >
+                      {mobileVisualsExpanded ? "COLLAPSE" : "EXPAND"}
+                    </button>
+                  </div>
+                  {mobileVisualsExpanded && (
+                    <div className="space-y-3 animate-fade-in">
+                      {/* Video Player */}
+                      <div className="space-y-1.5">
+                        <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border-custom bg-black flex items-center justify-center">
+                          {videoRendering && <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-2 z-20"><div className="w-6 h-6 rounded-full border-2 border-t-white border-white/20 animate-spin"></div></div>}
+                          {videoError && <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center p-2 text-center z-20 text-white text-[9px]"><AlertCircle className="text-red-500 w-4 h-4 mb-1" /><span>Compiler error.</span></div>}
+                          <video ref={videoRef} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleLoadedMetadata} className="w-full h-full object-contain" controls={false}>
+                            <source src="/static/renders/videos/generated_scene/480p15/MyScene.mp4" type="video/mp4" />
+                            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                          </video>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 text-[9px] font-mono">
+                          <span>{formatTime(currentTime)} / {formatTime(duration || 60)}</span>
+                          <div className="flex gap-1.5 items-center">
+                            <button onClick={handlePlayPause} className="px-2 py-0.5 rounded font-bold cursor-pointer" style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}>
+                              {isPlaying ? 'Pause' : 'Play'}
+                            </button>
+                            <select value={videoSpeed} onChange={handleSpeedChange} className="bg-transparent border border-border-custom rounded px-1 py-0.5 text-[8px]">
+                              <option value={0.5}>0.5x</option><option value={1.0}>1.0x</option><option value={1.5}>1.5x</option><option value={2.0}>2.0x</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Visualization */}
+                      <div className="space-y-1.5 border-t border-border-custom pt-2">
+                        {currentQuery ? (
+                          <MathGraphPlotter query={currentQuery} />
+                        ) : (
+                          <div className="text-center py-2 text-text-secondary text-[10px]">{t('noGraph')}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="flex-grow overflow-y-auto px-6 py-6 space-y-6 scrollbar-thin">
                 {messages.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                    <div className={`max-w-[85%] rounded-xl p-4 border transition-all ${msg.role === 'user' ? 'bg-background-secondary border-border-custom text-text-primary rounded-tr-none' : 'bg-background-primary border-border-custom rounded-tl-none shadow-xs'}`}>
-                      <div className="flex justify-between items-center text-[9px] font-mono text-text-secondary uppercase pb-1 mb-2 border-b border-border-custom">
+                    <div 
+                      className={`max-w-[85%] rounded-xl p-4 border transition-all ${
+                        msg.role === 'user' 
+                          ? 'rounded-tr-none text-text-primary' 
+                          : 'bg-background-primary border-border-custom rounded-tl-none shadow-xs'
+                      }`}
+                      style={
+                        msg.role === 'user' 
+                          ? { backgroundColor: 'var(--accent-light)', borderColor: 'var(--accent)' } 
+                          : { borderLeft: '3px solid var(--accent)' }
+                      }
+                    >
+                      <div className="flex justify-between items-center text-[9px] font-mono uppercase pb-1 mb-2 border-b border-border-custom" style={{ color: 'var(--accent)' }}>
                         <span>{msg.role === 'user' ? 'User Question' : 'MatAI Solve'}</span>
                       </div>
                       {msg.role === 'bot' && msg.id !== 'welcome' ? (
@@ -909,7 +1089,7 @@ const ChatWorkspace = () => {
                               <span className="flex items-center space-x-1.5"><Sliders size={13} className="text-text-secondary" /><span>2. {t('stepByStep')}</span></span>
                               {expandedSteps ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                             </button>
-                            {expandedSteps && <div className="p-3 space-y-2 bg-background-primary border-t border-border-custom text-xs">{mockSteps.map((step, sIdx) => (<div key={sIdx} className="p-2 border border-border-custom rounded-lg bg-background-secondary"><div className="font-bold text-[10px] font-mono text-text-primary mb-0.5">{step.title}</div><p className="text-text-secondary leading-normal">{step.body}</p></div>))}</div>}
+                            {expandedSteps && <div className="p-3 space-y-2 bg-background-primary border-t border-border-custom text-xs">{mockSteps.map((step, sIdx) => (<div key={sIdx} className="p-2 border border-border-custom rounded-lg bg-background-secondary" style={{ borderLeft: '2px solid var(--accent)' }}><div className="font-bold text-[10px] font-mono mb-0.5" style={{ color: 'var(--accent)' }}>{step.title}</div><p className="text-text-secondary leading-normal">{step.body}</p></div>))}</div>}
                           </div>
                           <div className="border border-border-custom rounded-lg overflow-hidden">
                             <button onClick={() => setExpandedFinal(!expandedFinal)} className="w-full flex items-center justify-between p-2.5 bg-background-secondary hover:bg-border-custom/25 transition-all text-xs font-semibold cursor-pointer">
@@ -960,7 +1140,7 @@ const ChatWorkspace = () => {
                   <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">{t('trendingTopics')}</h3>
                   <div className="space-y-2">
                     {trendingTopics.filter(t2 => t2.name.toLowerCase().includes(exploreSearch.toLowerCase())).map((topic, idx) => (
-                      <div key={idx} className="p-3 border border-border-custom rounded-xl bg-background-secondary space-y-1">
+                      <div key={idx} className="p-3 border border-border-custom rounded-xl bg-background-secondary space-y-1" style={{ borderLeft: '3px solid var(--accent)' }}>
                         <span className="font-bold text-xs text-text-primary">{topic.name}</span>
                         <p className="text-[10px] text-text-secondary">{topic.desc}</p>
                         <button onClick={() => { setActiveView('chat'); submitQuery(topic.query); }} className="text-[10px] font-bold flex items-center space-x-0.5 hover:underline cursor-pointer" style={{ color: 'var(--accent)' }}>
@@ -974,7 +1154,7 @@ const ChatWorkspace = () => {
                   <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">{t('popularProblems')}</h3>
                   <div className="space-y-2">
                     {popularProblems.filter(p => p.text.toLowerCase().includes(exploreSearch.toLowerCase())).map((prob, idx) => (
-                      <div key={idx} className="p-3 border border-border-custom rounded-xl bg-background-primary flex items-center justify-between">
+                      <div key={idx} className="p-3 border border-border-custom rounded-xl bg-background-primary flex items-center justify-between" style={{ borderLeft: '3px solid var(--accent)' }}>
                         <div className="space-y-0.5">
                           <span className="font-mono text-xs font-semibold">{prob.text}</span>
                           <div className="flex space-x-2">
@@ -992,7 +1172,7 @@ const ChatWorkspace = () => {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">{t('learningPaths')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {learningPaths.map((path, idx) => (
-                    <div key={idx} className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-3">
+                    <div key={idx} className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-3" style={{ borderLeft: '3px solid var(--accent)' }}>
                       <div className="flex justify-between items-start"><span className="font-bold text-sm">{path.name}</span><span className="text-[9px] text-text-secondary bg-background-primary px-1.5 py-0.5 rounded">{path.count}</span></div>
                       <div className="flex flex-wrap gap-1">{path.path.map((item, pIdx) => (<span key={pIdx} className="text-[8px] border border-border-custom bg-background-primary px-1.5 py-0.5 rounded">{item}</span>))}</div>
                       <div className="space-y-1">
@@ -1008,22 +1188,22 @@ const ChatWorkspace = () => {
 
           {/* C. PROBLEMS VIEW */}
           {activeView === 'problems' && (
-            <div className="p-6 space-y-6 animate-fade-in">
+            <div className="p-4 sm:p-6 space-y-6 animate-fade-in">
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-grow flex items-center space-x-2 bg-background-secondary border border-border-custom px-3 py-2 rounded-xl">
                   <Search size={14} className="text-text-secondary" />
-                  <input type="text" placeholder={t('searchProblems')} value={problemsSearch} onChange={(e) => setProblemsSearch(e.target.value)} className="flex-grow bg-transparent border-none text-xs p-0" />
+                  <input type="text" placeholder={t('searchProblems')} value={problemsSearch} onChange={(e) => setProblemsSearch(e.target.value)} className="flex-grow bg-transparent border-none text-xs p-0 focus:ring-0" />
                 </div>
-                <select value={problemsFilterCategory} onChange={(e) => setProblemsFilterCategory(e.target.value)} className="p-2 text-xs rounded-xl border border-border-custom bg-background-primary">
+                <select value={problemsFilterCategory} onChange={(e) => setProblemsFilterCategory(e.target.value)} className="p-2.5 text-xs rounded-xl border border-border-custom bg-background-primary">
                   <option value="all">{t('all')}</option><option value="Algebra">{t('algebra')}</option><option value="Calculus">{t('calculus')}</option><option value="Linear Algebra">{t('linearAlgebra')}</option><option value="Differential Equations">Differential Equations</option>
                 </select>
-                <select value={problemsFilterDifficulty} onChange={(e) => setProblemsFilterDifficulty(e.target.value)} className="p-2 text-xs rounded-xl border border-border-custom bg-background-primary">
+                <select value={problemsFilterDifficulty} onChange={(e) => setProblemsFilterDifficulty(e.target.value)} className="p-2.5 text-xs rounded-xl border border-border-custom bg-background-primary">
                   <option value="all">{t('all')}</option><option value="Basic">{t('basic')}</option><option value="Intermediate">{t('intermediate')}</option><option value="Advanced">{t('advanced')}</option>
                 </select>
               </div>
               <div className="space-y-2">
-                {popularProblems.filter(p => { const ms = p.text.toLowerCase().includes(problemsSearch.toLowerCase()); const mc = problemsFilterCategory === 'all' || p.category === problemsFilterCategory; const md = problemsFilterDifficulty === 'all' || p.difficulty === problemsFilterDifficulty; return ms && mc && md; }).map((prob, idx) => (
-                  <div key={idx} className="p-4 border border-border-custom bg-background-secondary rounded-xl flex items-center justify-between gap-4">
+                 {popularProblems.filter(p => { const ms = p.text.toLowerCase().includes(problemsSearch.toLowerCase()); const mc = problemsFilterCategory === 'all' || p.category === problemsFilterCategory; const md = problemsFilterDifficulty === 'all' || p.difficulty === problemsFilterDifficulty; return ms && mc && md; }).map((prob, idx) => (
+                  <div key={idx} className="p-4 border border-border-custom bg-background-secondary rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ borderLeft: '3px solid var(--accent)' }}>
                     <div className="space-y-1">
                       <span className="font-mono text-xs font-semibold text-text-primary block">{prob.text}</span>
                       <div className="flex space-x-2">
@@ -1031,7 +1211,7 @@ const ChatWorkspace = () => {
                         <span className="text-[9px] px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--accent-light)', color: 'var(--accent)' }}>{prob.difficulty}</span>
                       </div>
                     </div>
-                    <button onClick={() => { setActiveView('chat'); submitQuery(prob.text); }} className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer" style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}>{t('solveProblem')}</button>
+                    <button onClick={() => { setActiveView('chat'); submitQuery(prob.text); }} className="w-full sm:w-auto text-center px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer" style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}>{t('solveProblem')}</button>
                   </div>
                 ))}
               </div>
@@ -1049,7 +1229,7 @@ const ChatWorkspace = () => {
               </div>
               <div className="space-y-2">
                 {historyList.filter(h => h.query.toLowerCase().includes(historySearch.toLowerCase())).sort((a, b) => { const diff = new Date(b.date) - new Date(a.date); return historySortAsc ? -diff : diff; }).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)).map((session) => (
-                  <div key={session.id} className="p-3 border border-border-custom bg-background-secondary rounded-xl flex items-center justify-between gap-4">
+                  <div key={session.id} className="p-3 border border-border-custom bg-background-secondary rounded-xl flex items-center justify-between gap-4" style={{ borderLeft: '3px solid var(--accent)' }}>
                     <div className="space-y-1"><div className="flex items-center space-x-2"><span className="font-semibold text-xs text-text-primary">{session.title}</span>{session.pinned && <span className="text-[8px] font-mono bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded">{t('pinned')}</span>}</div><span className="text-[9px] text-text-secondary block font-mono">{new Date(session.date).toLocaleString()}</span></div>
                     <div className="flex items-center space-x-2">
                       <button onClick={() => setHistoryList(prev => prev.map(h => h.id === session.id ? { ...h, pinned: !h.pinned } : h))} className="p-1.5 rounded hover:bg-background-primary text-text-secondary cursor-pointer"><Bookmark size={12} className={session.pinned ? 'fill-yellow-500 text-yellow-500' : ''} /></button>
@@ -1073,7 +1253,7 @@ const ChatWorkspace = () => {
               </div>
               <div className="space-y-2">
                 {bookmarksList.filter(b => { const ms = b.title.toLowerCase().includes(bookmarksSearch.toLowerCase()); const mc = bookmarksCategory === 'all' || b.type === bookmarksCategory; return ms && mc; }).map((book) => (
-                  <div key={book.id} className="p-4 border border-border-custom bg-background-secondary rounded-xl flex items-center justify-between gap-4">
+                  <div key={book.id} className="p-4 border border-border-custom bg-background-secondary rounded-xl flex items-center justify-between gap-4" style={{ borderLeft: '3px solid var(--accent)' }}>
                     <div className="space-y-1"><span className="font-semibold text-xs text-text-primary block">{book.title}</span><div className="flex space-x-2 font-mono text-[9px] text-text-secondary"><span className="bg-background-primary px-1.5 py-0.5 rounded border border-border-custom uppercase">{book.type}</span><span>Saved {book.date}</span></div></div>
                     <div className="flex items-center space-x-2">
                       <button onClick={() => { setActiveView('chat'); submitQuery(book.query); }} className="px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer" style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}>{t('load')}</button>
@@ -1124,11 +1304,32 @@ const ChatWorkspace = () => {
             <div className="p-6 space-y-6 animate-fade-in">
               <div className="max-w-xl space-y-1"><h2 className="text-base font-bold">{t('analytics')}</h2><p className="text-xs text-text-secondary">Comprehensive logs monitoring calculation speeds, accuracies, and coverage.</p></div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-2"><div className="flex items-center justify-between"><span className="text-xs font-bold">{t('solvingAccuracy')}</span><TrendingUp size={14} className="text-green-500" /></div><span className="text-2xl font-bold font-mono tracking-tight block">96.4%</span><p className="text-[10px] text-text-secondary">Derived from 48 calculations with valid proofs.</p></div>
-                <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-2"><div className="flex items-center justify-between"><span className="text-xs font-bold">{t('topicCoverage')}</span><Activity size={14} className="text-blue-500" /></div><span className="text-2xl font-bold font-mono tracking-tight block">72.0%</span><p className="text-[10px] text-text-secondary">Topics: Calculus, Algebra, Matrices, Statistics.</p></div>
-                <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-2"><div className="flex items-center justify-between"><span className="text-xs font-bold">{t('studyDuration')}</span><Flame size={14} className="text-orange-500" /></div><span className="text-2xl font-bold font-mono tracking-tight block">14.5 hrs</span><p className="text-[10px] text-text-secondary">Cumulative across {streak} streak days.</p></div>
+                <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-2" style={{ borderLeft: '3px solid var(--accent)' }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold">{t('solvingAccuracy')}</span>
+                    <TrendingUp size={14} style={{ color: 'var(--accent)' }} />
+                  </div>
+                  <span className="text-2xl font-bold font-mono tracking-tight block" style={{ color: 'var(--accent)' }}>96.4%</span>
+                  <p className="text-[10px] text-text-secondary">Derived from {statsProblemsSolved} calculations with valid proofs.</p>
+                </div>
+                <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-2" style={{ borderLeft: '3px solid var(--accent)' }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold">{t('topicCoverage')}</span>
+                    <Activity size={14} style={{ color: 'var(--accent)' }} />
+                  </div>
+                  <span className="text-2xl font-bold font-mono tracking-tight block" style={{ color: 'var(--accent)' }}>72.0%</span>
+                  <p className="text-[10px] text-text-secondary">Topics: Calculus, Algebra, Matrices, Statistics.</p>
+                </div>
+                <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-2" style={{ borderLeft: '3px solid var(--accent)' }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold">{t('studyDuration')}</span>
+                    <Flame size={14} style={{ color: 'var(--accent)' }} />
+                  </div>
+                  <span className="text-2xl font-bold font-mono tracking-tight block" style={{ color: 'var(--accent)' }}>14.5 hrs</span>
+                  <p className="text-[10px] text-text-secondary">Cumulative across {streak} streak days.</p>
+                </div>
               </div>
-              <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-4">
+              <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-4" style={{ borderLeft: '3px solid var(--accent)' }}>
                 <span className="text-xs font-bold uppercase text-text-secondary tracking-wider block font-mono">{t('weeklyActivity')}</span>
                 <div className="space-y-2">
                   <div className="grid grid-cols-7 gap-1.5 max-w-sm justify-center mx-auto">
@@ -1144,7 +1345,7 @@ const ChatWorkspace = () => {
                   <div className="flex justify-between text-[10px] text-text-secondary max-w-sm mx-auto font-mono"><span>{t('lessActive')}</span><span>{t('moreActive')}</span></div>
                 </div>
               </div>
-              <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-3">
+              <div className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-3" style={{ borderLeft: '3px solid var(--accent)' }}>
                 <span className="text-xs font-bold uppercase text-text-secondary tracking-wider block font-mono">{t('topicMetrics')}</span>
                 <div className="space-y-2">
                   {[{ topic: `${t('algebra')} (Equations)`, pct: 95 },{ topic: `${t('calculus')} (Derivatives)`, pct: 80 },{ topic: `${t('statistics')} & Probability`, pct: 90 },{ topic: `${t('linearAlgebra')} (Matrices)`, pct: 85 }].map((metric, idx) => (
@@ -1175,7 +1376,7 @@ const ChatWorkspace = () => {
               </div>
               <button onClick={generatePracticeQuestion} className="px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all" style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-text)' }}>{t('generateQuestion')}</button>
               {practiceQuestion && (
-                <div className="border border-border-custom rounded-2xl p-6 bg-background-secondary space-y-4 animate-fade-in">
+                <div className="border border-border-custom rounded-2xl p-6 bg-background-secondary space-y-4 animate-fade-in" style={{ borderLeft: '4px solid var(--accent)' }}>
                   <div className="space-y-2">
                     <span className="text-[10px] font-mono text-text-secondary uppercase">Question:</span>
                     <p className="text-sm font-bold font-mono text-text-primary">{practiceQuestion.q}</p>
@@ -1194,7 +1395,7 @@ const ChatWorkspace = () => {
               )}
             </div>
           )}
-
+ 
           {/* I. FORMULA SHEET VIEW */}
           {activeView === 'formula sheet' && (
             <div className="p-6 space-y-6 animate-fade-in">
@@ -1209,7 +1410,7 @@ const ChatWorkspace = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(formulaData[formulaCategory] || []).map((f, idx) => (
-                  <div key={idx} className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-2">
+                  <div key={idx} className="p-4 border border-border-custom bg-background-secondary rounded-2xl space-y-2" style={{ borderLeft: '3px solid var(--accent)' }}>
                     <span className="font-bold text-xs text-text-primary">{f.name}</span>
                     <div className="p-3 rounded-lg bg-background-primary border border-border-custom font-mono text-sm text-text-primary tracking-wide">{f.formula}</div>
                     <button onClick={() => { setActiveView('chat'); submitQuery(f.formula); }} className="text-[10px] font-bold flex items-center space-x-1 cursor-pointer" style={{ color: 'var(--accent)' }}>
@@ -1225,43 +1426,21 @@ const ChatWorkspace = () => {
       </section>
 
       {/* COLUMN 3: OUTPUT WORKSPACE */}
-      <section className="w-96 flex flex-col h-screen flex-shrink-0 bg-background-secondary select-none">
-        <header className="p-3 border-b border-border-custom flex space-x-1.5 justify-between bg-background-primary">
-          {['solution', 'video', 'visualization', 'notes'].map((tab) => (
-            <button key={tab} onClick={() => setActiveOutputTab(tab)}
-              className={`flex-1 text-center py-1.5 rounded-md text-[10px] font-bold uppercase transition-all tracking-wider cursor-pointer ${activeOutputTab === tab ? 'shadow-xs' : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary'}`}
-              style={activeOutputTab === tab ? { backgroundColor: 'var(--accent)', color: 'var(--accent-text)' } : {}}
-            >{tab}</button>
-          ))}
-        </header>
+      {!isMobile && !rightPanelCollapsed && (
+        <section className="w-96 flex flex-col h-screen flex-shrink-0 bg-background-secondary select-none border-l border-border-custom animate-fade-in">
+          <header className="p-3 border-b border-border-custom flex space-x-1.5 justify-between bg-background-primary">
+            {['solution', 'video', 'visualization', 'notes'].map((tab) => (
+              <button key={tab} onClick={() => setActiveOutputTab(tab)}
+                className={`flex-1 text-center py-1.5 rounded-md text-[10px] font-bold uppercase transition-all tracking-wider cursor-pointer ${activeOutputTab === tab ? 'shadow-xs' : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary'}`}
+                style={activeOutputTab === tab ? { backgroundColor: 'var(--accent)', color: 'var(--accent-text)' } : {}}
+              >{tab}</button>
+            ))}
+          </header>
 
-        <div className="flex-grow overflow-y-auto p-4 space-y-6 scrollbar-thin bg-background-primary/30">
-          {/* Solution tab */}
-          {activeOutputTab === 'solution' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="flex items-center space-x-2 border-b border-border-custom pb-2"><BookOpen size={14} className="text-text-secondary" /><span className="font-bold text-xs uppercase tracking-wide">{t('solutionSummary')}</span></div>
-              {currentSolutionHtml ? (
-                <div className="bg-background-primary border border-border-custom p-4 rounded-xl text-xs leading-relaxed font-mono overflow-x-auto" dangerouslySetInnerHTML={{ __html: currentSolutionHtml }}></div>
-              ) : (
-                <div className="text-center py-8 text-text-secondary text-xs">{t('noSolution')}</div>
-              )}
-              <div className="pt-4 border-t border-border-custom space-y-2">
-                <h4 className="text-[10px] font-bold uppercase text-text-secondary tracking-wider">{t('relatedConcepts')}</h4>
-                <div className="space-y-1">
-                  {relatedConcepts.map((item, idx) => (
-                    <button key={idx} onClick={() => { setActiveView('chat'); submitQuery(item.query); }} className="w-full flex items-center justify-between p-2 rounded-lg border border-border-custom bg-background-primary hover:bg-background-secondary text-xs text-text-secondary hover:text-text-primary transition-all text-left cursor-pointer">
-                      <span className="truncate">{item.name}</span><ArrowRight size={11} className="flex-shrink-0" style={{ color: 'var(--accent)' }} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Video tab */}
-          {activeOutputTab === 'video' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="flex items-center space-x-2 border-b border-border-custom pb-2"><Play size={14} className="text-text-secondary" /><span className="font-bold text-xs uppercase tracking-wide">{t('videoPlayer')}</span></div>
+          <div className="flex-grow overflow-y-auto p-4 space-y-6 scrollbar-thin bg-background-primary/30">
+            {/* Stacked Visual 1: Video Player */}
+            <div ref={videoSectionRef} className="space-y-4 border-b border-border-custom pb-4 transition-all">
+              <div className="flex items-center space-x-2"><Play size={14} className="text-text-secondary" /><span className="font-bold text-xs uppercase tracking-wide">{t('videoPlayer')}</span></div>
               <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-border-custom bg-black flex items-center justify-center">
                 {videoRendering && <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-2 z-20"><div className="w-8 h-8 rounded-full border-2 border-t-white border-white/20 animate-spin"></div><span className="text-[10px] font-mono text-white uppercase tracking-widest">RENDERING</span></div>}
                 {videoError && <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center p-4 text-center space-y-2 z-20 text-white"><AlertCircle className="text-red-500 w-8 h-8" /><span className="text-[10px] font-mono">Compiler error.</span><button onClick={() => setVideoError(false)} className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-[9px] font-mono cursor-pointer">Dismiss</button></div>}
@@ -1270,7 +1449,7 @@ const ChatWorkspace = () => {
                   <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
                 </video>
               </div>
-              <div className="border border-border-custom bg-background-secondary p-3 rounded-xl space-y-3 shadow-xs">
+              <div className="border border-border-custom bg-background-secondary p-3 rounded-xl space-y-3 shadow-xs" style={{ borderLeft: '3px solid var(--accent)' }}>
                 <div className="flex items-center justify-between text-[10px] font-mono text-text-secondary"><span>{formatTime(currentTime)} / {formatTime(duration || 60)}</span>
                   <select value={videoSpeed} onChange={handleSpeedChange} className="bg-transparent border border-border-custom rounded px-1.5 py-0.5 text-[9px] font-mono">
                     <option value={0.5}>0.5x</option><option value={1.0}>1.0x</option><option value={1.5}>1.5x</option><option value={2.0}>2.0x</option>
@@ -1286,12 +1465,10 @@ const ChatWorkspace = () => {
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Visualization tab */}
-          {activeOutputTab === 'visualization' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="flex items-center space-x-2 border-b border-border-custom pb-2"><Layers size={14} className="text-text-secondary" /><span className="font-bold text-xs uppercase tracking-wide">{t('visualization')}</span></div>
+            {/* Stacked Visual 2: Visualization */}
+            <div ref={vizSectionRef} className="space-y-4 border-b border-border-custom pb-4 transition-all">
+              <div className="flex items-center space-x-2"><Layers size={14} className="text-text-secondary" /><span className="font-bold text-xs uppercase tracking-wide">{t('visualization')}</span></div>
               {currentQuery ? (
                 <div className="space-y-3">
                   <span className="text-[10px] font-mono text-text-secondary">FUNCTION PLOT: f(x) for {currentQuery}</span>
@@ -1302,20 +1479,42 @@ const ChatWorkspace = () => {
                 <div className="text-center py-8 text-text-secondary text-xs">{t('noGraph')}</div>
               )}
             </div>
-          )}
 
-          {/* Notes tab */}
-          {activeOutputTab === 'notes' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="flex items-center space-x-2 border-b border-border-custom pb-2"><Bookmark size={14} className="text-text-secondary" /><span className="font-bold text-xs uppercase tracking-wide">{t('notes')}</span></div>
-              <div className="space-y-2">
-                <div className="p-3 border border-border-custom rounded-xl bg-background-primary leading-normal text-xs text-text-secondary space-y-1"><div className="font-bold text-[10px] font-mono text-text-primary uppercase">{t('calculus')} Note</div><p>Polynomial tangent slopes indicate speed. Tangents are positive where slope is ascending, negative where descending, and zero at local extrema.</p></div>
-                <div className="p-3 border border-border-custom rounded-xl bg-background-primary leading-normal text-xs text-text-secondary space-y-1"><div className="font-bold text-[10px] font-mono text-text-primary uppercase">KaTeX Syntax</div><p>Always write vectors as \vec v and integral formulas with limits to guarantee alignment validation.</p></div>
+            {/* Solution tab */}
+            {activeOutputTab === 'solution' && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="flex items-center space-x-2 border-b border-border-custom pb-2"><BookOpen size={14} className="text-text-secondary" /><span className="font-bold text-xs uppercase tracking-wide">{t('solutionSummary')}</span></div>
+                {currentSolutionHtml ? (
+                  <div className="bg-background-primary border border-border-custom p-4 rounded-xl text-xs leading-relaxed font-mono overflow-x-auto" style={{ borderLeft: '3px solid var(--accent)' }} dangerouslySetInnerHTML={{ __html: currentSolutionHtml }}></div>
+                ) : (
+                  <div className="text-center py-8 text-text-secondary text-xs">{t('noSolution')}</div>
+                )}
+                <div className="pt-4 border-t border-border-custom space-y-2">
+                  <h4 className="text-[10px] font-bold uppercase text-text-secondary tracking-wider">{t('relatedConcepts')}</h4>
+                  <div className="space-y-1">
+                    {relatedConcepts.map((item, idx) => (
+                      <button key={idx} onClick={() => { setActiveView('chat'); submitQuery(item.query); }} className="w-full flex items-center justify-between p-2 rounded-lg border border-border-custom bg-background-primary hover:bg-background-secondary text-xs text-text-secondary hover:text-text-primary transition-all text-left cursor-pointer">
+                        <span className="truncate">{item.name}</span><ArrowRight size={11} className="flex-shrink-0" style={{ color: 'var(--accent)' }} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      </section>
+            )}
+
+            {/* Notes tab */}
+            {activeOutputTab === 'notes' && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="flex items-center space-x-2 border-b border-border-custom pb-2"><Bookmark size={14} className="text-text-secondary" /><span className="font-bold text-xs uppercase tracking-wide">{t('notes')}</span></div>
+                <div className="space-y-2">
+                  <div className="p-3 border border-border-custom rounded-xl bg-background-primary leading-normal text-xs text-text-secondary space-y-1" style={{ borderLeft: '3px solid var(--accent)' }}><div className="font-bold text-[10px] font-mono text-text-primary uppercase">{t('calculus')} Note</div><p>Polynomial tangent slopes indicate speed. Tangents are positive where slope is ascending, negative where descending, and zero at local extrema.</p></div>
+                  <div className="p-3 border border-border-custom rounded-xl bg-background-primary leading-normal text-xs text-text-secondary space-y-1" style={{ borderLeft: '3px solid var(--accent)' }}><div className="font-bold text-[10px] font-mono text-text-primary uppercase">KaTeX Syntax</div><p>Always write vectors as \vec v and integral formulas with limits to guarantee alignment validation.</p></div>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
     </div>
   );
